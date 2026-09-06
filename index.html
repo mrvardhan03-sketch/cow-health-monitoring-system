@@ -1,261 +1,1028 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Cow Health & Live GPS Monitoring</title>
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
-<style>
+<title>
+Cow Health & Live GPS Monitoring
+</title>
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: Arial, Helvetica, sans-serif;
-}
 
-body {
-    background: #f4f7f9;
-    color: #222;
-}
+<!-- Google Font -->
 
-header {
-    background: #1f6f43;
-    color: white;
-    padding: 20px;
-    text-align: center;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
-}
+<link rel="preconnect"
+href="https://fonts.googleapis.com">
 
-header h1 {
-    font-size: 28px;
-}
+<link rel="preconnect"
+href="https://fonts.gstatic.com"
+crossorigin>
 
-header p {
-    margin-top: 6px;
-    font-size: 14px;
-}
+<link
+href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+rel="stylesheet">
 
-.container {
-    width: 95%;
-    max-width: 1400px;
-    margin: 25px auto;
-}
 
-.status-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 18px;
-    margin-bottom: 25px;
-}
-
-.status-card {
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
-}
-
-.status-card h3 {
-    color: #555;
-    font-size: 15px;
-    margin-bottom: 10px;
-}
-
-.status-value {
-    font-size: 21px;
-    font-weight: bold;
-}
-
-.online {
-    color: #16833b;
-}
-
-.offline {
-    color: #d62828;
-}
-
-.waiting {
-    color: #e09b00;
-}
-
-.section-title {
-    margin: 25px 0 15px;
-    font-size: 22px;
-    color: #1f6f43;
-}
-
-.sensor-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 18px;
-}
-
-.sensor-card {
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
-}
-
-.sensor-card h3 {
-    font-size: 16px;
-    color: #555;
-    margin-bottom: 12px;
-}
-
-.sensor-value {
-    font-size: 26px;
-    font-weight: bold;
-    color: #1f6f43;
-}
-
-.sensor-status {
-    margin-top: 7px;
-    font-size: 13px;
-    color: #777;
-}
-
-.gps-info {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 18px;
-}
-
-.info-card {
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
-}
-
-.info-card h3 {
-    font-size: 15px;
-    color: #555;
-    margin-bottom: 8px;
-}
-
-.info-value {
-    font-size: 20px;
-    font-weight: bold;
-}
-
-.map-section {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    margin-top: 25px;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
-}
-
-#map {
-    width: 100%;
-    height: 500px;
-    border-radius: 10px;
-    margin-top: 15px;
-}
-
-.buttons {
-    margin-top: 20px;
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-button {
-    border: none;
-    padding: 12px 22px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 15px;
-    font-weight: bold;
-}
-
-.start-btn {
-    background: #1f8f4d;
-    color: white;
-}
-
-.stop-btn {
-    background: #d62828;
-    color: white;
-}
-
-button:hover {
-    opacity: 0.85;
-}
-
-.note {
-    margin-top: 15px;
-    padding: 15px;
-    background: #eef5f0;
-    border-left: 5px solid #1f6f43;
-    border-radius: 6px;
-    color: #555;
-    font-size: 14px;
-    line-height: 1.6;
-}
-
-footer {
-    text-align: center;
-    padding: 25px;
-    margin-top: 30px;
-    background: #1f6f43;
-    color: white;
-    font-size: 14px;
-}
-
-@media(max-width:600px) {
-
-    header h1 {
-        font-size: 21px;
-    }
-
-    #map {
-        height: 400px;
-    }
-
-}
-
-</style>
+<!-- Leaflet -->
 
 <link
 rel="stylesheet"
 href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
 />
 
+
+<style>
+
+/* =========================================================
+   GLOBAL
+   ========================================================= */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+
+    font-family:"Inter",Arial,sans-serif;
+
+    background:#f4f7f6;
+
+    color:#17231c;
+
+    min-height:100vh;
+
+}
+
+button{
+
+    font-family:inherit;
+
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.header{
+
+    background:
+    linear-gradient(
+        135deg,
+        #14532d,
+        #1f7a46
+    );
+
+    color:white;
+
+    padding:28px 5%;
+
+    box-shadow:
+    0 4px 20px rgba(0,0,0,.12);
+
+}
+
+.header-content{
+
+    max-width:1500px;
+
+    margin:auto;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:20px;
+
+}
+
+.logo-area{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+}
+
+.logo{
+
+    width:58px;
+
+    height:58px;
+
+    border-radius:16px;
+
+    background:rgba(255,255,255,.15);
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:32px;
+
+    backdrop-filter:blur(10px);
+
+}
+
+.header h1{
+
+    font-size:25px;
+
+    font-weight:800;
+
+    letter-spacing:.3px;
+
+}
+
+.header p{
+
+    margin-top:6px;
+
+    font-size:13px;
+
+    opacity:.85;
+
+}
+
+.update-box{
+
+    text-align:right;
+
+    font-size:12px;
+
+    opacity:.9;
+
+}
+
+
+/* =========================================================
+   MAIN
+   ========================================================= */
+
+.container{
+
+    width:92%;
+
+    max-width:1500px;
+
+    margin:28px auto 50px;
+
+}
+
+
+/* =========================================================
+   TOP STATUS
+   ========================================================= */
+
+.status-grid{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(3,1fr);
+
+    gap:18px;
+
+    margin-bottom:28px;
+
+}
+
+.status-card{
+
+    background:white;
+
+    border-radius:18px;
+
+    padding:22px;
+
+    border:1px solid #e7ece9;
+
+    box-shadow:
+    0 8px 25px rgba(30,70,45,.07);
+
+    position:relative;
+
+    overflow:hidden;
+
+}
+
+.status-card::before{
+
+    content:"";
+
+    position:absolute;
+
+    left:0;
+
+    top:0;
+
+    width:5px;
+
+    height:100%;
+
+    background:#1f7a46;
+
+}
+
+.status-card h3{
+
+    font-size:12px;
+
+    text-transform:uppercase;
+
+    letter-spacing:1px;
+
+    color:#718078;
+
+    margin-bottom:10px;
+
+}
+
+.status-value{
+
+    font-size:22px;
+
+    font-weight:800;
+
+}
+
+.online{
+
+    color:#16813e;
+
+}
+
+.offline{
+
+    color:#d62828;
+
+}
+
+.waiting{
+
+    color:#d18b00;
+
+}
+
+
+/* =========================================================
+   SECTION
+   ========================================================= */
+
+.section-header{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    margin:32px 0 16px;
+
+}
+
+.section-title{
+
+    font-size:20px;
+
+    font-weight:800;
+
+    color:#173a27;
+
+}
+
+.section-subtitle{
+
+    font-size:12px;
+
+    color:#7b8781;
+
+}
+
+
+/* =========================================================
+   SENSOR GRID
+   ========================================================= */
+
+.sensor-grid{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(4,1fr);
+
+    gap:18px;
+
+}
+
+
+/* =========================================================
+   SENSOR CARD
+   ========================================================= */
+
+.sensor-card{
+
+    background:white;
+
+    border:1px solid #e7ece9;
+
+    border-radius:18px;
+
+    padding:21px;
+
+    box-shadow:
+    0 8px 25px rgba(30,70,45,.06);
+
+    transition:
+    transform .2s ease,
+    box-shadow .2s ease;
+
+}
+
+.sensor-card:hover{
+
+    transform:translateY(-3px);
+
+    box-shadow:
+    0 12px 30px rgba(30,70,45,.11);
+
+}
+
+.sensor-top{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:17px;
+
+}
+
+.sensor-icon{
+
+    width:42px;
+
+    height:42px;
+
+    border-radius:12px;
+
+    background:#edf7f0;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:21px;
+
+}
+
+.sensor-name{
+
+    font-size:13px;
+
+    color:#65736b;
+
+    font-weight:600;
+
+}
+
+.sensor-value{
+
+    font-size:29px;
+
+    font-weight:800;
+
+    color:#173a27;
+
+    letter-spacing:-.8px;
+
+}
+
+.sensor-unit{
+
+    font-size:14px;
+
+    font-weight:600;
+
+    color:#7a8780;
+
+    margin-left:4px;
+
+}
+
+.sensor-status{
+
+    margin-top:10px;
+
+    font-size:11px;
+
+    color:#8a968f;
+
+}
+
+
+/* =========================================================
+   HEART RATE SPECIAL
+   ========================================================= */
+
+.heart-card{
+
+    background:
+    linear-gradient(
+        145deg,
+        #ffffff,
+        #fff8f8
+    );
+
+}
+
+.heart-card .sensor-icon{
+
+    background:#fff0f0;
+
+}
+
+
+/* =========================================================
+   ACTIVITY
+   ========================================================= */
+
+.activity-value{
+
+    text-transform:uppercase;
+
+    font-size:24px;
+
+}
+
+
+/* =========================================================
+   ACCELEROMETER
+   ========================================================= */
+
+.accel-grid{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(3,1fr);
+
+    gap:18px;
+
+}
+
+.accel-card{
+
+    background:white;
+
+    border:1px solid #e7ece9;
+
+    border-radius:18px;
+
+    padding:21px;
+
+    box-shadow:
+    0 8px 25px rgba(30,70,45,.06);
+
+}
+
+.axis{
+
+    font-size:12px;
+
+    font-weight:700;
+
+    color:#738078;
+
+    text-transform:uppercase;
+
+    letter-spacing:.8px;
+
+}
+
+.axis-value{
+
+    margin-top:10px;
+
+    font-size:27px;
+
+    font-weight:800;
+
+    color:#173a27;
+
+}
+
+.axis-status{
+
+    font-size:11px;
+
+    color:#8a968f;
+
+    margin-top:8px;
+
+}
+
+
+/* =========================================================
+   GPS
+   ========================================================= */
+
+.gps-grid{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(4,1fr);
+
+    gap:18px;
+
+}
+
+.gps-card{
+
+    background:white;
+
+    border-radius:18px;
+
+    padding:21px;
+
+    border:1px solid #e7ece9;
+
+    box-shadow:
+    0 8px 25px rgba(30,70,45,.06);
+
+}
+
+.gps-label{
+
+    color:#718078;
+
+    font-size:12px;
+
+    font-weight:600;
+
+    text-transform:uppercase;
+
+    letter-spacing:.7px;
+
+}
+
+.gps-value{
+
+    margin-top:10px;
+
+    font-size:21px;
+
+    font-weight:800;
+
+    color:#173a27;
+
+    word-break:break-word;
+
+}
+
+
+/* =========================================================
+   MAP
+   ========================================================= */
+
+.map-panel{
+
+    background:white;
+
+    border-radius:20px;
+
+    padding:20px;
+
+    margin-top:20px;
+
+    border:1px solid #e7ece9;
+
+    box-shadow:
+    0 8px 25px rgba(30,70,45,.07);
+
+}
+
+.map-header{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:15px;
+
+    margin-bottom:16px;
+
+}
+
+.map-title{
+
+    font-size:17px;
+
+    font-weight:800;
+
+    color:#173a27;
+
+}
+
+.map-distance{
+
+    font-size:13px;
+
+    color:#718078;
+
+}
+
+#map{
+
+    width:100%;
+
+    height:540px;
+
+    border-radius:15px;
+
+    overflow:hidden;
+
+}
+
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.controls{
+
+    display:flex;
+
+    gap:12px;
+
+    flex-wrap:wrap;
+
+    margin-top:18px;
+
+}
+
+.btn{
+
+    border:none;
+
+    border-radius:11px;
+
+    padding:12px 20px;
+
+    font-size:13px;
+
+    font-weight:700;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+.btn:hover{
+
+    transform:translateY(-2px);
+
+}
+
+.start-btn{
+
+    background:#16813e;
+
+    color:white;
+
+}
+
+.stop-btn{
+
+    background:#d62828;
+
+    color:white;
+
+}
+
+
+/* =========================================================
+   INFORMATION NOTE
+   ========================================================= */
+
+.info-panel{
+
+    margin-top:20px;
+
+    padding:18px 20px;
+
+    background:#f0f7f2;
+
+    border:1px solid #dcece1;
+
+    border-radius:14px;
+
+    color:#526158;
+
+    font-size:12px;
+
+    line-height:1.7;
+
+}
+
+.info-panel strong{
+
+    color:#173a27;
+
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+footer{
+
+    background:#123d27;
+
+    color:white;
+
+    padding:25px;
+
+    text-align:center;
+
+    font-size:12px;
+
+}
+
+.footer-main{
+
+    font-weight:700;
+
+    margin-bottom:5px;
+
+}
+
+.footer-sub{
+
+    opacity:.7;
+
+}
+
+
+/* =========================================================
+   LIVE DOT
+   ========================================================= */
+
+.live-dot{
+
+    display:inline-block;
+
+    width:8px;
+
+    height:8px;
+
+    background:#20a653;
+
+    border-radius:50%;
+
+    margin-right:6px;
+
+    animation:pulse 1.5s infinite;
+
+}
+
+@keyframes pulse{
+
+    0%{
+
+        box-shadow:
+        0 0 0 0 rgba(32,166,83,.5);
+
+    }
+
+    70%{
+
+        box-shadow:
+        0 0 0 8px rgba(32,166,83,0);
+
+    }
+
+    100%{
+
+        box-shadow:
+        0 0 0 0 rgba(32,166,83,0);
+
+    }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media(max-width:1100px){
+
+    .sensor-grid{
+
+        grid-template-columns:
+        repeat(2,1fr);
+
+    }
+
+    .gps-grid{
+
+        grid-template-columns:
+        repeat(2,1fr);
+
+    }
+
+}
+
+@media(max-width:750px){
+
+    .header-content{
+
+        align-items:flex-start;
+
+        flex-direction:column;
+
+    }
+
+    .update-box{
+
+        text-align:left;
+
+    }
+
+    .status-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .sensor-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .accel-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .gps-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+    #map{
+
+        height:430px;
+
+    }
+
+}
+
+@media(max-width:480px){
+
+    .container{
+
+        width:94%;
+
+        margin-top:18px;
+
+    }
+
+    .header{
+
+        padding:20px 4%;
+
+    }
+
+    .header h1{
+
+        font-size:19px;
+
+    }
+
+    .logo{
+
+        width:48px;
+
+        height:48px;
+
+        font-size:26px;
+
+    }
+
+    .sensor-value{
+
+        font-size:26px;
+
+    }
+
+    #map{
+
+        height:380px;
+
+    }
+
+}
+
+</style>
+
 </head>
+
 
 <body>
 
-<header>
 
-<h1>🐄 COW HEALTH & LIVE GPS MONITORING</h1>
+<!-- =========================================================
+     HEADER
+     ========================================================= -->
+
+<header class="header">
+
+<div class="header-content">
+
+<div class="logo-area">
+
+<div class="logo">
+🐄
+</div>
+
+<div>
+
+<h1>
+COW HEALTH & LIVE GPS MONITORING
+</h1>
 
 <p>
 IoT Based Cow Health Monitoring and Live Location Tracking System
 </p>
 
+</div>
+
+</div>
+
+
+<div class="update-box">
+
+<div>
+Dashboard Status
+</div>
+
+<div id="lastUpdate">
+Connecting...
+</div>
+
+</div>
+
+</div>
+
 </header>
 
 
-<div class="container">
+
+<main class="container">
 
 
-<!-- =================================================
+<!-- =========================================================
      SYSTEM STATUS
-     ================================================= -->
+     ========================================================= -->
 
 <div class="status-grid">
 
+
 <div class="status-card">
 
-<h3>System</h3>
+<h3>
+System
+</h3>
 
 <div
 id="systemStatus"
-class="status-value online">
+class="status-value waiting">
 
 CONNECTING...
 
@@ -266,7 +1033,9 @@ CONNECTING...
 
 <div class="status-card">
 
-<h3>GPS</h3>
+<h3>
+GPS
+</h3>
 
 <div
 id="gpsStatus"
@@ -281,7 +1050,9 @@ WAITING...
 
 <div class="status-card">
 
-<h3>Tracking</h3>
+<h3>
+Tracking
+</h3>
 
 <div
 id="trackingStatus"
@@ -293,33 +1064,60 @@ STOPPED
 
 </div>
 
+
 </div>
 
 
 
-<!-- =================================================
+<!-- =========================================================
      COW HEALTH
-     ================================================= -->
+     ========================================================= -->
 
-<h2 class="section-title">
+<div class="section-header">
+
+<div>
+
+<div class="section-title">
 🐄 Cow Health Information
-</h2>
+</div>
+
+<div class="section-subtitle">
+Live sensor information received from the IoT system
+</div>
+
+</div>
+
+</div>
 
 
 <div class="sensor-grid">
 
 
+<!-- Cow Temperature -->
+
 <div class="sensor-card">
 
-<h3>
-🌡 Cow Contact Temperature
-</h3>
+<div class="sensor-top">
 
-<div
-id="cowTemperature"
-class="sensor-value">
+<div class="sensor-name">
+Cow Contact Temperature
+</div>
 
--- °C
+<div class="sensor-icon">
+🌡️
+</div>
+
+</div>
+
+<div class="sensor-value">
+
+<span id="cowTemperature">
+--
+</span>
+
+<span class="sensor-unit">
+°C
+</span>
 
 </div>
 
@@ -335,17 +1133,31 @@ Waiting for sensor
 
 
 
-<div class="sensor-card">
+<!-- Heart Rate -->
 
-<h3>
-❤️ Heart Rate
-</h3>
+<div class="sensor-card heart-card">
 
-<div
-id="heartRate"
-class="sensor-value">
+<div class="sensor-top">
 
--- BPM
+<div class="sensor-name">
+Heart Rate
+</div>
+
+<div class="sensor-icon">
+❤️
+</div>
+
+</div>
+
+<div class="sensor-value">
+
+<span id="heartRate">
+--
+</span>
+
+<span class="sensor-unit">
+BPM
+</span>
 
 </div>
 
@@ -361,17 +1173,31 @@ Waiting for sensor
 
 
 
+<!-- Environment -->
+
 <div class="sensor-card">
 
-<h3>
-🌡 Environment Temperature
-</h3>
+<div class="sensor-top">
 
-<div
-id="environmentTemp"
-class="sensor-value">
+<div class="sensor-name">
+Environment Temperature
+</div>
 
--- °C
+<div class="sensor-icon">
+🌤️
+</div>
+
+</div>
+
+<div class="sensor-value">
+
+<span id="environmentTemp">
+--
+</span>
+
+<span class="sensor-unit">
+°C
+</span>
 
 </div>
 
@@ -387,17 +1213,31 @@ Waiting for sensor
 
 
 
+<!-- Humidity -->
+
 <div class="sensor-card">
 
-<h3>
-💧 Humidity
-</h3>
+<div class="sensor-top">
 
-<div
-id="humidity"
-class="sensor-value">
+<div class="sensor-name">
+Humidity
+</div>
 
--- %
+<div class="sensor-icon">
+💧
+</div>
+
+</div>
+
+<div class="sensor-value">
+
+<span id="humidity">
+--
+</span>
+
+<span class="sensor-unit">
+%
+</span>
 
 </div>
 
@@ -413,15 +1253,25 @@ Waiting for sensor
 
 
 
+<!-- Activity -->
+
 <div class="sensor-card">
 
-<h3>
-🐄 Activity
-</h3>
+<div class="sensor-top">
+
+<div class="sensor-name">
+Cow Activity
+</div>
+
+<div class="sensor-icon">
+🐄
+</div>
+
+</div>
 
 <div
 id="activity"
-class="sensor-value">
+class="sensor-value activity-value">
 
 --
 
@@ -442,35 +1292,47 @@ Waiting for sensor
 
 
 
-<!-- =================================================
+<!-- =========================================================
      ACCELEROMETER
-     ================================================= -->
+     ========================================================= -->
 
-<h2 class="section-title">
-📈 Accelerometer
-</h2>
+<div class="section-header">
+
+<div>
+
+<div class="section-title">
+📈 Movement & Accelerometer
+</div>
+
+<div class="section-subtitle">
+MPU6050 three-axis motion monitoring
+</div>
+
+</div>
+
+</div>
 
 
-<div class="sensor-grid">
+<div class="accel-grid">
 
 
-<div class="sensor-card">
+<div class="accel-card">
 
-<h3>
+<div class="axis">
 Acceleration X
-</h3>
+</div>
 
-<div
-id="accelX"
-class="sensor-value">
+<div class="axis-value">
 
+<span id="accelX">
 --
+</span>
 
 </div>
 
 <div
 id="accelXStatus"
-class="sensor-status">
+class="axis-status">
 
 Waiting for sensor
 
@@ -479,24 +1341,23 @@ Waiting for sensor
 </div>
 
 
+<div class="accel-card">
 
-<div class="sensor-card">
-
-<h3>
+<div class="axis">
 Acceleration Y
-</h3>
+</div>
 
-<div
-id="accelY"
-class="sensor-value">
+<div class="axis-value">
 
+<span id="accelY">
 --
+</span>
 
 </div>
 
 <div
 id="accelYStatus"
-class="sensor-status">
+class="axis-status">
 
 Waiting for sensor
 
@@ -505,24 +1366,23 @@ Waiting for sensor
 </div>
 
 
+<div class="accel-card">
 
-<div class="sensor-card">
-
-<h3>
+<div class="axis">
 Acceleration Z
-</h3>
+</div>
 
-<div
-id="accelZ"
-class="sensor-value">
+<div class="axis-value">
 
+<span id="accelZ">
 --
+</span>
 
 </div>
 
 <div
 id="accelZStatus"
-class="sensor-status">
+class="axis-status">
 
 Waiting for sensor
 
@@ -535,27 +1395,39 @@ Waiting for sensor
 
 
 
-<!-- =================================================
-     GPS INFORMATION
-     ================================================= -->
+<!-- =========================================================
+     GPS
+     ========================================================= -->
 
-<h2 class="section-title">
-📍 GPS Information
-</h2>
+<div class="section-header">
+
+<div>
+
+<div class="section-title">
+📍 GPS Location
+</div>
+
+<div class="section-subtitle">
+NEO-6M satellite positioning information
+</div>
+
+</div>
+
+</div>
 
 
-<div class="gps-info">
+<div class="gps-grid">
 
 
-<div class="info-card">
+<div class="gps-card">
 
-<h3>
+<div class="gps-label">
 Latitude
-</h3>
+</div>
 
 <div
 id="latitude"
-class="info-value">
+class="gps-value">
 
 --
 
@@ -564,16 +1436,15 @@ class="info-value">
 </div>
 
 
+<div class="gps-card">
 
-<div class="info-card">
-
-<h3>
+<div class="gps-label">
 Longitude
-</h3>
+</div>
 
 <div
 id="longitude"
-class="info-value">
+class="gps-value">
 
 --
 
@@ -582,16 +1453,15 @@ class="info-value">
 </div>
 
 
+<div class="gps-card">
 
-<div class="info-card">
-
-<h3>
+<div class="gps-label">
 Satellites
-</h3>
+</div>
 
 <div
 id="satellites"
-class="info-value">
+class="gps-value">
 
 --
 
@@ -600,16 +1470,15 @@ class="info-value">
 </div>
 
 
+<div class="gps-card">
 
-<div class="info-card">
-
-<h3>
+<div class="gps-label">
 Route Distance
-</h3>
+</div>
 
 <div
 id="routeDistance"
-class="info-value">
+class="gps-value">
 
 0.00 km
 
@@ -622,21 +1491,42 @@ class="info-value">
 
 
 
-<!-- =================================================
-     LIVE LOCATION
-     ================================================= -->
+<!-- =========================================================
+     MAP
+     ========================================================= -->
 
-<div class="map-section">
+<div class="map-panel">
 
-<h2 class="section-title">
+
+<div class="map-header">
+
+<div>
+
+<div class="map-title">
 🗺️ Live Location & Route
-</h2>
+</div>
+
+</div>
+
+<div class="map-distance">
+
+Distance:
+<strong id="mapDistance">
+0.00 km
+</strong>
+
+</div>
+
+</div>
 
 
-<div class="buttons">
+<div id="map"></div>
+
+
+<div class="controls">
 
 <button
-class="start-btn"
+class="btn start-btn"
 onclick="startTracking()">
 
 ▶ START TRACKING
@@ -645,7 +1535,7 @@ onclick="startTracking()">
 
 
 <button
-class="stop-btn"
+class="btn stop-btn"
 onclick="stopTracking()">
 
 ■ STOP TRACKING
@@ -655,56 +1545,77 @@ onclick="stopTracking()">
 </div>
 
 
-<div id="map"></div>
+<div class="info-panel">
 
-
-<div class="note">
-
-<strong>Sensor Information:</strong>
+<strong>
+Sensor Information:
+</strong>
 
 A numeric value means the system has received a value from Blynk.
-It is shown as "Last received value" and does not automatically mean
-that the physical sensor is currently connected.
+It is displayed as <strong>"Last received value"</strong> and does not
+automatically mean that the physical sensor is currently connected.
 
-If the value is null, the dashboard shows
-"Waiting for sensor".
+If the value is null, the dashboard displays
+<strong>"Waiting for sensor"</strong>.
 
-</div>
-
-</div>
-
+The ESP32 system status is determined separately using the
+heartbeat signal from the ESP32.
 
 </div>
 
 
+</div>
+
+
+</main>
+
+
+
+<!-- =========================================================
+     FOOTER
+     ========================================================= -->
 
 <footer>
 
-Cow Health Monitoring System |
-ESP32 + IoT + GPS + Blynk
+<div class="footer-main">
+
+🐄 Cow Health Monitoring System
+
+</div>
+
+<div class="footer-sub">
+
+ESP32 • IoT • Blynk • GPS • Cloudflare • MPU6050 • MAX30102 • DS18B20
+
+</div>
 
 </footer>
 
 
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- =========================================================
+     LEAFLET
+     ========================================================= -->
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+
 
 
 <script>
 
-
-/* =================================================
-   CLOUDFLARE WORKER API
-   ================================================= */
+/* =========================================================
+   CLOUDFLARE WORKER
+   ========================================================= */
 
 const API_URL =
 "https://purple-math-e7c0.mrvardhan03.workers.dev/";
 
 
 
-/* =================================================
-   MAP INITIALIZATION
-   ================================================= */
+/* =========================================================
+   MAP
+   ========================================================= */
 
 let map =
 L.map("map").setView(
@@ -716,13 +1627,18 @@ L.map("map").setView(
 L.tileLayer(
 "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
 {
+
 maxZoom:19,
-attribution:"© OpenStreetMap"
+
+attribution:
+"© OpenStreetMap"
+
 }
 ).addTo(map);
 
 
 let cowMarker = null;
+
 
 let routeLine =
 L.polyline(
@@ -734,9 +1650,9 @@ weight:5
 
 
 
-/* =================================================
-   DISTANCE CALCULATION
-   ================================================= */
+/* =========================================================
+   DISTANCE
+   ========================================================= */
 
 function calculateDistance(
 lat1,
@@ -756,13 +1672,17 @@ const dLon =
 Math.PI/180;
 
 const a =
-Math.sin(dLat/2) *
-Math.sin(dLat/2) +
+Math.sin(dLat/2) ** 2 +
 
-Math.cos(lat1*Math.PI/180) *
-Math.cos(lat2*Math.PI/180) *
-Math.sin(dLon/2) *
-Math.sin(dLon/2);
+Math.cos(
+lat1*Math.PI/180
+) *
+
+Math.cos(
+lat2*Math.PI/180
+) *
+
+Math.sin(dLon/2) ** 2;
 
 const c =
 2 *
@@ -776,7 +1696,6 @@ return R*c;
 }
 
 
-
 function calculateRouteDistance(history){
 
 let total = 0;
@@ -787,7 +1706,8 @@ i<history.length;
 i++
 ){
 
-total += calculateDistance(
+total +=
+calculateDistance(
 
 history[i-1].latitude,
 history[i-1].longitude,
@@ -805,15 +1725,14 @@ return total;
 
 
 
-/* =================================================
-   SENSOR UPDATE FUNCTION
-   ================================================= */
+/* =========================================================
+   SENSOR UPDATE
+   ========================================================= */
 
 function updateSensor(
 valueElement,
 statusElement,
 value,
-unit,
 decimals=1
 ){
 
@@ -831,8 +1750,7 @@ Number.isFinite(number)
 ){
 
 valueElement.innerText =
-number.toFixed(decimals) +
-unit;
+number.toFixed(decimals);
 
 statusElement.innerText =
 "Last received value";
@@ -844,7 +1762,7 @@ return;
 }
 
 valueElement.innerText =
-"--" + unit;
+"--";
 
 statusElement.innerText =
 "Waiting for sensor";
@@ -853,13 +1771,14 @@ statusElement.innerText =
 
 
 
-/* =================================================
+/* =========================================================
    FETCH DATA
-   ================================================= */
+   ========================================================= */
 
 async function fetchData(){
 
 try{
+
 
 const requestURL =
 API_URL +
@@ -897,9 +1816,21 @@ data
 
 
 
-/* =================================================
-   ESP32 SYSTEM STATUS
-   ================================================= */
+/* =========================================================
+   LAST UPDATE
+   ========================================================= */
+
+document.getElementById(
+"lastUpdate"
+).innerText =
+"Last checked: " +
+new Date().toLocaleTimeString();
+
+
+
+/* =========================================================
+   ESP32 STATUS
+   ========================================================= */
 
 const systemElement =
 document.getElementById(
@@ -912,8 +1843,8 @@ data.esp32Status ===
 "ESP32 LIVE"
 ){
 
-systemElement.innerText =
-"🟢 ESP32 LIVE";
+systemElement.innerHTML =
+'<span class="live-dot"></span>ESP32 LIVE';
 
 systemElement.className =
 "status-value online";
@@ -931,12 +1862,9 @@ systemElement.className =
 
 
 
-/* =================================================
+/* =========================================================
    GPS STATUS
-   ================================================= */
-
-const gpsStatus =
-data.gpsStatus;
+   ========================================================= */
 
 const gpsElement =
 document.getElementById(
@@ -945,14 +1873,14 @@ document.getElementById(
 
 
 if(
-gpsStatus &&
-gpsStatus
+data.gpsStatus &&
+data.gpsStatus
 .toUpperCase()
 .includes("FIXED")
 ){
 
 gpsElement.innerText =
-"GPS FIXED";
+"🟢 GPS FIXED";
 
 gpsElement.className =
 "status-value online";
@@ -961,7 +1889,7 @@ gpsElement.className =
 else{
 
 gpsElement.innerText =
-"WAITING FOR GPS";
+"🟡 WAITING FOR GPS";
 
 gpsElement.className =
 "status-value waiting";
@@ -970,9 +1898,9 @@ gpsElement.className =
 
 
 
-/* =================================================
-   TRACKING STATUS
-   ================================================= */
+/* =========================================================
+   TRACKING
+   ========================================================= */
 
 const trackingElement =
 document.getElementById(
@@ -986,7 +1914,7 @@ data.tracking ===
 ){
 
 trackingElement.innerText =
-"STARTED";
+"🟢 STARTED";
 
 trackingElement.className =
 "status-value online";
@@ -995,7 +1923,7 @@ trackingElement.className =
 else{
 
 trackingElement.innerText =
-"STOPPED";
+"🔴 STOPPED";
 
 trackingElement.className =
 "status-value offline";
@@ -1004,9 +1932,9 @@ trackingElement.className =
 
 
 
-/* =================================================
+/* =========================================================
    COW TEMPERATURE
-   ================================================= */
+   ========================================================= */
 
 updateSensor(
 
@@ -1020,17 +1948,15 @@ document.getElementById(
 
 data.cowTemperature,
 
-" °C",
-
 1
 
 );
 
 
 
-/* =================================================
+/* =========================================================
    HEART RATE
-   ================================================= */
+   ========================================================= */
 
 updateSensor(
 
@@ -1044,17 +1970,15 @@ document.getElementById(
 
 data.heartRate,
 
-" BPM",
-
 0
 
 );
 
 
 
-/* =================================================
-   ENVIRONMENT TEMPERATURE
-   ================================================= */
+/* =========================================================
+   ENVIRONMENT
+   ========================================================= */
 
 updateSensor(
 
@@ -1068,17 +1992,15 @@ document.getElementById(
 
 data.environmentTemp,
 
-" °C",
-
 1
 
 );
 
 
 
-/* =================================================
+/* =========================================================
    HUMIDITY
-   ================================================= */
+   ========================================================= */
 
 updateSensor(
 
@@ -1092,24 +2014,22 @@ document.getElementById(
 
 data.humidity,
 
-" %",
-
 1
 
 );
 
 
 
-/* =================================================
+/* =========================================================
    ACTIVITY
-   ================================================= */
+   ========================================================= */
 
 const activityElement =
 document.getElementById(
 "activity"
 );
 
-const activityStatusElement =
+const activityStatus =
 document.getElementById(
 "activityStatus"
 );
@@ -1124,7 +2044,7 @@ data.activity !== ""
 activityElement.innerText =
 data.activity;
 
-activityStatusElement.innerText =
+activityStatus.innerText =
 "Last received value";
 
 }
@@ -1133,16 +2053,16 @@ else{
 activityElement.innerText =
 "--";
 
-activityStatusElement.innerText =
+activityStatus.innerText =
 "Waiting for sensor";
 
 }
 
 
 
-/* =================================================
-   ACCELEROMETER X
-   ================================================= */
+/* =========================================================
+   ACCELEROMETER
+   ========================================================= */
 
 updateSensor(
 
@@ -1156,17 +2076,10 @@ document.getElementById(
 
 data.accelX,
 
-"",
-
 2
 
 );
 
-
-
-/* =================================================
-   ACCELEROMETER Y
-   ================================================= */
 
 updateSensor(
 
@@ -1180,17 +2093,10 @@ document.getElementById(
 
 data.accelY,
 
-"",
-
 2
 
 );
 
-
-
-/* =================================================
-   ACCELEROMETER Z
-   ================================================= */
 
 updateSensor(
 
@@ -1204,35 +2110,38 @@ document.getElementById(
 
 data.accelZ,
 
-"",
-
 2
 
 );
 
 
 
-/* =================================================
+/* =========================================================
    GPS INFORMATION
-   ================================================= */
+   ========================================================= */
 
 if(
 data.latitude !== null &&
 data.longitude !== null
 ){
 
+const lat =
+Number(data.latitude);
+
+const lng =
+Number(data.longitude);
+
+
 document.getElementById(
 "latitude"
 ).innerText =
-Number(data.latitude)
-.toFixed(6);
+lat.toFixed(6);
 
 
 document.getElementById(
 "longitude"
 ).innerText =
-Number(data.longitude)
-.toFixed(6);
+lng.toFixed(6);
 
 
 document.getElementById(
@@ -1266,9 +2175,9 @@ document.getElementById(
 
 
 
-/* =================================================
-   MAP LOCATION
-   ================================================= */
+/* =========================================================
+   MAP MARKER
+   ========================================================= */
 
 if(
 data.latitude !== null &&
@@ -1289,8 +2198,9 @@ L.marker(
 [lat,lng]
 ).addTo(map);
 
+
 cowMarker.bindPopup(
-"🐄 Cow Current Location"
+"<b>🐄 Cow Current Location</b>"
 );
 
 }
@@ -1302,18 +2212,13 @@ cowMarker.setLatLng(
 
 }
 
-
-map.setView(
-[lat,lng]
-);
-
 }
 
 
 
-/* =================================================
-   ROUTE HISTORY
-   ================================================= */
+/* =========================================================
+   ROUTE
+   ========================================================= */
 
 if(
 Array.isArray(data.history) &&
@@ -1323,8 +2228,11 @@ data.history.length > 0
 const routePoints =
 data.history.map(
 point => [
+
 Number(point.latitude),
+
 Number(point.longitude)
+
 ]
 );
 
@@ -1347,15 +2255,21 @@ distance.toFixed(2) +
 " km";
 
 
+document.getElementById(
+"mapDistance"
+).innerText =
+distance.toFixed(2) +
+" km";
+
+
 if(
-data.latitude !== null &&
-data.longitude !== null
+routePoints.length > 1
 ){
 
 map.fitBounds(
 routeLine.getBounds(),
 {
-padding:[30,30]
+padding:[35,35]
 }
 );
 
@@ -1371,6 +2285,11 @@ document.getElementById(
 ).innerText =
 "0.00 km";
 
+document.getElementById(
+"mapDistance"
+).innerText =
+"0.00 km";
+
 }
 
 
@@ -1383,23 +2302,21 @@ error
 );
 
 
-/*
-   IMPORTANT:
-   Only show CONNECTION ERROR when
-   Cloudflare Worker itself cannot be reached.
+document.getElementById(
+"lastUpdate"
+).innerText =
+"Connection error";
 
-   If Worker responds with
-   ESP32 OFFLINE, the previous section
-   handles that correctly.
-*/
 
 const systemElement =
 document.getElementById(
 "systemStatus"
 );
 
+
 systemElement.innerText =
 "⚠️ CONNECTION ERROR";
+
 
 systemElement.className =
 "status-value offline";
@@ -1410,21 +2327,24 @@ systemElement.className =
 
 
 
-/* =================================================
+/* =========================================================
    START TRACKING
-   ================================================= */
+   ========================================================= */
 
 async function startTracking(){
 
 try{
 
 await fetch(
+
 API_URL +
 "?action=start&t=" +
 Date.now(),
+
 {
 cache:"no-store"
 }
+
 );
 
 fetchData();
@@ -1440,21 +2360,24 @@ console.error(error);
 
 
 
-/* =================================================
+/* =========================================================
    STOP TRACKING
-   ================================================= */
+   ========================================================= */
 
 async function stopTracking(){
 
 try{
 
 await fetch(
+
 API_URL +
 "?action=stop&t=" +
 Date.now(),
+
 {
 cache:"no-store"
 }
+
 );
 
 fetchData();
@@ -1470,25 +2393,25 @@ console.error(error);
 
 
 
-/* =================================================
-   INITIAL DATA LOAD
-   ================================================= */
+/* =========================================================
+   INITIAL LOAD
+   ========================================================= */
 
 fetchData();
 
 
 
-/* =================================================
-   REFRESH EVERY 5 SECONDS
-   ================================================= */
+/* =========================================================
+   AUTO REFRESH
+   ========================================================= */
 
 setInterval(
 fetchData,
 5000
 );
 
-
 </script>
 
 </body>
+
 </html>
