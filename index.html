@@ -1,880 +1,807 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-  <meta charset="UTF-8">
-
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
-
-  <title>Cow Health & Live GPS Monitoring</title>
-
-  <!-- Leaflet CSS -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  >
-
-  <style>
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: #eef1f5;
-      color: #222;
-    }
-
-
-    /* =====================================================
-       HEADER
-       ===================================================== */
-
-    header {
-      background: #111827;
-      color: white;
-      padding: 24px 20px;
-      text-align: center;
-      border-bottom: 4px solid #2563eb;
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 28px;
-      letter-spacing: 0.5px;
-    }
-
-    header p {
-      margin: 8px 0 0;
-      font-size: 14px;
-      color: #cbd5e1;
-    }
-
-
-    /* =====================================================
-       MAIN CONTAINER
-       ===================================================== */
-
-    .container {
-      width: 95%;
-      max-width: 1200px;
-      margin: 25px auto;
-    }
-
-
-    /* =====================================================
-       SECTION TITLE
-       ===================================================== */
-
-    .section-title {
-      font-size: 22px;
-      font-weight: bold;
-      margin: 25px 0 15px;
-    }
-
-
-    /* =====================================================
-       SYSTEM STATUS
-       ===================================================== */
-
-    .system-status {
-      background: white;
-      border-radius: 12px;
-      padding: 18px 20px;
-      margin-bottom: 20px;
-
-      box-shadow:
-        0 3px 12px rgba(0,0,0,0.08);
-
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-
-      flex-wrap: wrap;
-      gap: 15px;
-    }
-
-    .status-title {
-      font-size: 14px;
-      color: #64748b;
-    }
-
-    .status-value {
-      font-size: 18px;
-      font-weight: bold;
-      margin-top: 5px;
-    }
-
-    .status-indicator {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .status-dot {
-      width: 12px;
-      height: 12px;
-
-      background: #f59e0b;
-
-      border-radius: 50%;
-
-      display: inline-block;
-
-      box-shadow:
-        0 0 8px rgba(245,158,11,0.5);
-    }
-
-
-    /* =====================================================
-       TRACKING STATUS
-       ===================================================== */
-
-    .tracking-status {
-      background: white;
-      border-radius: 12px;
-
-      padding: 18px 20px;
-      margin-bottom: 20px;
-
-      box-shadow:
-        0 3px 12px rgba(0,0,0,0.08);
-
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-
-      flex-wrap: wrap;
-      gap: 15px;
-    }
-
-    .tracking-title {
-      font-size: 14px;
-      color: #64748b;
-    }
-
-    .tracking-value {
-      font-size: 21px;
-      font-weight: bold;
-      margin-top: 5px;
-      color: #dc2626;
-    }
-
-
-    /* =====================================================
-       DATA CARDS
-       ===================================================== */
-
-    .cards {
-      display: grid;
-
-      grid-template-columns:
-        repeat(4, 1fr);
-
-      gap: 16px;
-
-      margin-bottom: 20px;
-    }
-
-    .card {
-      background: white;
-
-      border-radius: 12px;
-
-      padding: 20px;
-
-      box-shadow:
-        0 3px 12px rgba(0,0,0,0.08);
-
-      border-left: 4px solid #2563eb;
-    }
-
-    .card-title {
-      font-size: 14px;
-      color: #64748b;
-
-      margin-bottom: 10px;
-    }
-
-    .card-value {
-      font-size: 22px;
-      font-weight: bold;
-
-      word-break: break-word;
-    }
-
-    .card-unit {
-      font-size: 13px;
-      color: #64748b;
-      margin-left: 3px;
-    }
-
-
-    /* =====================================================
-       GPS CARDS
-       ===================================================== */
-
-    .gps-card {
-      border-left-color: #2563eb;
-    }
-
-
-    /* =====================================================
-       HEALTH CARDS
-       ===================================================== */
-
-    .health-card {
-      border-left-color: #16a34a;
-    }
-
-
-    /* =====================================================
-       ACTIVITY CARD
-       ===================================================== */
-
-    .activity-card {
-      border-left-color: #f59e0b;
-    }
-
-
-    /* =====================================================
-       MAP SECTION
-       ===================================================== */
-
-    .map-section {
-      background: white;
-
-      padding: 18px;
-
-      border-radius: 12px;
-
-      box-shadow:
-        0 3px 12px rgba(0,0,0,0.08);
-
-      margin-top: 20px;
-    }
-
-    .map-header {
-      display: flex;
-
-      justify-content: space-between;
-
-      align-items: center;
-
-      margin-bottom: 15px;
-
-      flex-wrap: wrap;
-
-      gap: 10px;
-    }
-
-    .map-title {
-      font-size: 20px;
-      font-weight: bold;
-    }
-
-    .map-info {
-      font-size: 13px;
-      color: #64748b;
-    }
-
-    #map {
-      width: 100%;
-      height: 500px;
-
-      border-radius: 10px;
-
-      overflow: hidden;
-    }
-
-
-    /* =====================================================
-       BUTTON AREA
-       ===================================================== */
-
-    .button-area {
-      text-align: center;
-
-      margin-top: 18px;
-    }
-
-    button {
-      color: white;
-
-      border: none;
-
-      padding: 13px 24px;
-
-      border-radius: 8px;
-
-      font-size: 15px;
-
-      font-weight: bold;
-
-      cursor: pointer;
-
-      transition: 0.2s;
-
-      margin: 5px;
-    }
-
-    button:hover {
-      transform: translateY(-1px);
-    }
-
-    .start-btn {
-      background: #16a34a;
-    }
-
-    .start-btn:hover {
-      background: #15803d;
-    }
-
-    .stop-btn {
-      background: #dc2626;
-    }
-
-    .stop-btn:hover {
-      background: #b91c1c;
-    }
-
-    .maps-btn {
-      background: #2563eb;
-    }
-
-    .maps-btn:hover {
-      background: #1d4ed8;
-    }
-
-
-    /* =====================================================
-       FOOTER
-       ===================================================== */
-
-    footer {
-      text-align: center;
-
-      padding: 25px 15px;
-
-      color: #64748b;
-
-      font-size: 13px;
-    }
-
-
-    /* =====================================================
-       RESPONSIVE
-       ===================================================== */
-
-    @media (max-width: 950px) {
-
-      .cards {
-        grid-template-columns:
-          repeat(2, 1fr);
-      }
-
-    }
-
-
-    @media (max-width: 550px) {
-
-      header h1 {
-        font-size: 23px;
-      }
-
-      .container {
-        width: 94%;
-      }
-
-      .cards {
-        grid-template-columns: 1fr;
-      }
-
-      .system-status {
-        align-items: flex-start;
-
-        flex-direction: column;
-      }
-
-      .tracking-status {
-        align-items: flex-start;
-
-        flex-direction: column;
-      }
-
-      #map {
-        height: 400px;
-      }
-
-      .card-value {
-        font-size: 20px;
-      }
-
-      .button-area button {
-        width: 100%;
-
-        margin: 5px 0;
-      }
-
-    }
-
-  </style>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Cow Health Monitoring System</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #f4f7fb;
+  --card: #ffffff;
+  --text: #172033;
+  --muted: #718096;
+  --border: #e6ebf2;
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --green: #16a34a;
+  --green-light: #eaf8ef;
+  --orange: #f59e0b;
+  --orange-light: #fff7df;
+  --red: #dc2626;
+  --red-light: #fff0f0;
+  --purple: #7c3aed;
+  --cyan: #0891b2;
+  --shadow: 0 8px 28px rgba(15, 23, 42, 0.07);
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter", Arial, sans-serif;
+}
+
+/* ================= HEADER ================= */
+
+header {
+  background:
+    linear-gradient(135deg, #0f172a, #172554 55%, #1e40af);
+  color: white;
+  padding: 28px 5%;
+}
+
+.header-inner {
+  max-width: 1250px;
+  margin: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 25px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.brand-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 31px;
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.brand p {
+  margin: 7px 0 0;
+  color: #cbd5e1;
+  font-size: 13px;
+}
+
+.header-status {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 15px;
+  border-radius: 30px;
+  background: rgba(255,255,255,0.1);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.header-dot {
+  width: 10px;
+  height: 10px;
+  background: #f59e0b;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(245,158,11,0.8);
+}
+
+/* ================= MAIN ================= */
+
+.container {
+  width: 92%;
+  max-width: 1250px;
+  margin: 28px auto 50px;
+}
+
+/* ================= TOP STATUS ================= */
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.status-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+
+.status-label {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+
+.status-main {
+  margin-top: 9px;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.status-sub {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.status-badge-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--orange);
+}
+
+.status-badge-dot.green {
+  background: var(--green);
+}
+
+/* ================= SECTION ================= */
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  margin: 30px 0 15px;
+}
+
+.section-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.section-description {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* ================= SENSOR CARDS ================= */
+
+.sensor-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.sensor-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.sensor-card::after {
+  content: "";
+  position: absolute;
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  right: -30px;
+  top: -30px;
+  background: rgba(37,99,235,0.06);
+}
+
+.sensor-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  margin-bottom: 15px;
+  background: #eff6ff;
+}
+
+.sensor-name {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.sensor-value {
+  margin-top: 9px;
+  font-size: 27px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.sensor-unit {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.sensor-state {
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.sensor-state.online {
+  color: var(--green);
+  font-weight: 600;
+}
+
+/* Different icons */
+
+.heart .sensor-icon {
+  background: #fff0f0;
+}
+
+.temp .sensor-icon {
+  background: #fff7ed;
+}
+
+.humidity .sensor-icon {
+  background: #ecfeff;
+}
+
+.activity .sensor-icon {
+  background: #fefce8;
+}
+
+.gps .sensor-icon {
+  background: #eff6ff;
+}
+
+.accel .sensor-icon {
+  background: #f5f3ff;
+}
+
+/* ================= GPS ================= */
+
+.gps-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.gps-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+
+.gps-label {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.gps-value {
+  margin-top: 10px;
+  font-size: 22px;
+  font-weight: 800;
+  word-break: break-word;
+}
+
+.gps-help {
+  margin-top: 7px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ================= MAP ================= */
+
+.map-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 20px;
+  margin-top: 25px;
+  box-shadow: var(--shadow);
+}
+
+.map-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.map-title {
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.map-subtitle {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.map-status {
+  padding: 9px 13px;
+  border-radius: 20px;
+  background: var(--orange-light);
+  color: #a16207;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+#map {
+  height: 480px;
+  width: 100%;
+  border-radius: 13px;
+  overflow: hidden;
+}
+
+/* ================= CONTROLS ================= */
+
+.controls {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+button {
+  border: none;
+  border-radius: 10px;
+  padding: 13px 19px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+.start {
+  background: var(--green);
+  color: white;
+}
+
+.start:hover {
+  background: #15803d;
+}
+
+.stop {
+  background: var(--red);
+  color: white;
+}
+
+.stop:hover {
+  background: #b91c1c;
+}
+
+.maps {
+  background: var(--primary);
+  color: white;
+}
+
+.maps:hover {
+  background: var(--primary-dark);
+}
+
+/* ================= TERMINAL ================= */
+
+.info-panel {
+  margin-top: 25px;
+  background: #111827;
+  border-radius: 16px;
+  padding: 20px;
+  color: white;
+  box-shadow: var(--shadow);
+}
+
+.info-title {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.info-text {
+  margin-top: 8px;
+  color: #cbd5e1;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* ================= FOOTER ================= */
+
+footer {
+  text-align: center;
+  padding: 28px 15px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 1000px) {
+  .status-grid,
+  .sensor-grid,
+  .gps-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .header-inner {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 600px) {
+  header {
+    padding: 22px 5%;
+  }
+
+  .brand h1 {
+    font-size: 21px;
+  }
+
+  .container {
+    width: 94%;
+    margin-top: 20px;
+  }
+
+  .status-grid,
+  .sensor-grid,
+  .gps-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-title {
+    font-size: 18px;
+  }
+
+  #map {
+    height: 390px;
+  }
+
+  .map-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  button {
+    width: 100%;
+  }
+}
+</style>
 </head>
-
 
 <body>
 
+<!-- ================= HEADER ================= -->
 
-  <!-- =====================================================
-       HEADER
-       ===================================================== -->
+<header>
+  <div class="header-inner">
 
-  <header>
-
-    <h1>
-      COW HEALTH & LIVE GPS MONITORING
-    </h1>
-
-    <p>
-      ESP32 • NEO-6M GPS • Blynk IoT • Cloudflare • Web Dashboard
-    </p>
-
-  </header>
-
-
-  <!-- =====================================================
-       MAIN
-       ===================================================== -->
-
-  <div class="container">
-
-
-    <!-- ===================================================
-         SYSTEM STATUS
-         =================================================== -->
-
-    <div class="system-status">
+    <div class="brand">
+      <div class="brand-icon">🐄</div>
 
       <div>
+        <h1>Cow Health Monitoring System</h1>
 
-        <div class="status-title">
-          SYSTEM STATUS
-        </div>
+        <p>
+          IoT-Based Health, Activity & Live GPS Monitoring
+        </p>
+      </div>
+    </div>
 
-        <div class="status-value">
+    <div class="header-status">
+      <span class="header-dot" id="headerDot"></span>
+      <span id="headerStatus">Connecting...</span>
+    </div>
 
-          <span class="status-indicator">
+  </div>
+</header>
 
-            <span
-              class="status-dot"
-              id="statusDot">
-            </span>
 
-            <span id="status">
-              Connecting...
-            </span>
+<!-- ================= MAIN ================= -->
 
-          </span>
+<div class="container">
 
-        </div>
 
+  <!-- ================= SYSTEM OVERVIEW ================= -->
+
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">System Overview</h2>
+      <p class="section-description">
+        Real-time monitoring status of the connected IoT system
+      </p>
+    </div>
+  </div>
+
+  <div class="status-grid">
+
+    <div class="status-card">
+      <div class="status-label">System Status</div>
+
+      <div class="status-main status-badge">
+        <span class="status-badge-dot" id="systemDot"></span>
+        <span id="systemStatus">Connecting...</span>
       </div>
 
+      <div class="status-sub">
+        ESP32 → Blynk → Cloudflare
+      </div>
+    </div>
 
-      <div>
 
-        <div class="status-title">
-          LAST UPDATE
-        </div>
+    <div class="status-card">
+      <div class="status-label">GPS Status</div>
 
-        <div
-          class="status-value"
-          id="lastUpdate">
+      <div class="status-main" id="gpsStatus">
+        WAITING FOR GPS
+      </div>
 
-          Waiting...
+      <div class="status-sub">
+        NEO-6M satellite positioning
+      </div>
+    </div>
 
-        </div>
 
+    <div class="status-card">
+      <div class="status-label">Route Tracking</div>
+
+      <div class="status-main" id="trackingStatus">
+        STOPPED
+      </div>
+
+      <div class="status-sub">
+        GPS route recording
+      </div>
+    </div>
+
+
+    <div class="status-card">
+      <div class="status-label">Last Update</div>
+
+      <div class="status-main" id="lastUpdate">
+        Waiting...
+      </div>
+
+      <div class="status-sub">
+        Automatic refresh every 5 seconds
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- ================= HEALTH ================= -->
+
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">Cow Health Monitoring</h2>
+
+      <p class="section-description">
+        Live readings from the connected health and environmental sensors
+      </p>
+    </div>
+  </div>
+
+
+  <div class="sensor-grid">
+
+
+    <!-- Cow Temperature -->
+
+    <div class="sensor-card temp">
+
+      <div class="sensor-icon">🌡️</div>
+
+      <div class="sensor-name">
+        Cow Contact Temperature
+      </div>
+
+      <div class="sensor-value">
+        <span id="cowTemperature">--</span>
+        <span class="sensor-unit">°C</span>
+      </div>
+
+      <div class="sensor-state" id="cowTempState">
+        Waiting for sensor
       </div>
 
     </div>
 
 
-    <!-- ===================================================
-         TRACKING STATUS
-         =================================================== -->
+    <!-- Heart Rate -->
 
-    <div class="tracking-status">
+    <div class="sensor-card heart">
 
-      <div>
+      <div class="sensor-icon">❤️</div>
 
-        <div class="tracking-title">
-          GPS ROUTE TRACKING
-        </div>
+      <div class="sensor-name">
+        Heart Rate
+      </div>
 
-        <div
-          class="tracking-value"
-          id="trackingStatus">
+      <div class="sensor-value">
+        <span id="heartRate">--</span>
+        <span class="sensor-unit">BPM</span>
+      </div>
 
-          STOPPED
-
-        </div>
-
+      <div class="sensor-state" id="heartState">
+        Waiting for sensor
       </div>
 
     </div>
 
 
-    <!-- ===================================================
-         GPS SECTION
-         =================================================== -->
+    <!-- Environment Temperature -->
 
-    <div class="section-title">
-      GPS INFORMATION
-    </div>
+    <div class="sensor-card temp">
 
+      <div class="sensor-icon">🌡️</div>
 
-    <div class="cards">
-
-
-      <!-- LATITUDE -->
-
-      <div class="card gps-card">
-
-        <div class="card-title">
-          LATITUDE
-        </div>
-
-        <div
-          class="card-value"
-          id="latitude">
-
-          Waiting...
-
-        </div>
-
+      <div class="sensor-name">
+        Environment Temperature
       </div>
 
-
-      <!-- LONGITUDE -->
-
-      <div class="card gps-card">
-
-        <div class="card-title">
-          LONGITUDE
-        </div>
-
-        <div
-          class="card-value"
-          id="longitude">
-
-          Waiting...
-
-        </div>
-
+      <div class="sensor-value">
+        <span id="environmentTemp">--</span>
+        <span class="sensor-unit">°C</span>
       </div>
 
-
-      <!-- SATELLITES -->
-
-      <div class="card gps-card">
-
-        <div class="card-title">
-          SATELLITES
-        </div>
-
-        <div class="card-value">
-
-          <span id="satellites">
-            Waiting...
-          </span>
-
-          <span class="card-unit">
-            GPS
-          </span>
-
-        </div>
-
-      </div>
-
-
-      <!-- DISTANCE -->
-
-      <div class="card gps-card">
-
-        <div class="card-title">
-          ROUTE DISTANCE
-        </div>
-
-        <div class="card-value">
-
-          <span id="distance">
-            0.00
-          </span>
-
-          <span class="card-unit">
-            km
-          </span>
-
-        </div>
-
+      <div class="sensor-state online" id="environmentState">
+        Sensor connected
       </div>
 
     </div>
 
 
-    <!-- ===================================================
-         HEALTH SECTION
-         =================================================== -->
+    <!-- Humidity -->
 
-    <div class="section-title">
-      COW HEALTH INFORMATION
-    </div>
+    <div class="sensor-card humidity">
 
+      <div class="sensor-icon">💧</div>
 
-    <div class="cards">
-
-
-      <!-- COW TEMPERATURE -->
-
-      <div class="card health-card">
-
-        <div class="card-title">
-          COW CONTACT TEMPERATURE
-        </div>
-
-        <div class="card-value">
-
-          <span id="cowTemperature">
-            Waiting...
-          </span>
-
-          <span class="card-unit">
-            °C
-          </span>
-
-        </div>
-
+      <div class="sensor-name">
+        Humidity
       </div>
 
-
-      <!-- HEART RATE -->
-
-      <div class="card health-card">
-
-        <div class="card-title">
-          HEART RATE
-        </div>
-
-        <div class="card-value">
-
-          <span id="heartRate">
-            Waiting...
-          </span>
-
-          <span class="card-unit">
-            BPM
-          </span>
-
-        </div>
-
+      <div class="sensor-value">
+        <span id="humidity">--</span>
+        <span class="sensor-unit">%</span>
       </div>
 
-
-      <!-- ENVIRONMENT TEMPERATURE -->
-
-      <div class="card health-card">
-
-        <div class="card-title">
-          ENVIRONMENT TEMPERATURE
-        </div>
-
-        <div class="card-value">
-
-          <span id="environmentTemp">
-            Waiting...
-          </span>
-
-          <span class="card-unit">
-            °C
-          </span>
-
-        </div>
-
-      </div>
-
-
-      <!-- HUMIDITY -->
-
-      <div class="card health-card">
-
-        <div class="card-title">
-          HUMIDITY
-        </div>
-
-        <div class="card-value">
-
-          <span id="humidity">
-            Waiting...
-          </span>
-
-          <span class="card-unit">
-            %
-          </span>
-
-        </div>
-
-      </div>
-
-
-      <!-- ACTIVITY -->
-
-      <div class="card activity-card">
-
-        <div class="card-title">
-          ACTIVITY
-        </div>
-
-        <div
-          class="card-value"
-          id="activity">
-
-          Waiting...
-
-        </div>
-
-      </div>
-
-
-      <!-- ACCEL X -->
-
-      <div class="card activity-card">
-
-        <div class="card-title">
-          ACCELEROMETER X
-        </div>
-
-        <div class="card-value">
-
-          <span id="accelX">
-            Waiting...
-          </span>
-
-          <span class="card-unit">
-            g
-          </span>
-
-        </div>
-
-      </div>
-
-
-      <!-- ACCEL Y -->
-
-      <div class="card activity-card">
-
-        <div class="card-title">
-          ACCELEROMETER Y
-        </div>
-
-        <div class="card-value">
-
-          <span id="accelY">
-            Waiting...
-          </span>
-
-          <span class="card-unit">
-            g
-          </span>
-
-        </div>
-
-      </div>
-
-
-      <!-- ACCEL Z -->
-
-      <div class="card activity-card">
-
-        <div class="card-title">
-          ACCELEROMETER Z
-        </div>
-
-        <div class="card-value">
-
-          <span id="accelZ">
-            Waiting...
-          </span>
-
-          <span class="card-unit">
-            g
-          </span>
-
-        </div>
-
+      <div class="sensor-state online" id="humidityState">
+        Sensor connected
       </div>
 
     </div>
 
 
-    <!-- ===================================================
-         MAP
-         =================================================== -->
+    <!-- Activity -->
 
-    <div class="map-section">
+    <div class="sensor-card activity">
 
+      <div class="sensor-icon">🐄</div>
 
-      <div class="map-header">
-
-        <div class="map-title">
-          Live Location & Route
-        </div>
-
-        <div class="map-info">
-          Blue line = travelled route
-        </div>
-
+      <div class="sensor-name">
+        Cow Activity
       </div>
 
+      <div class="sensor-value" id="activity">
+        STABLE
+      </div>
 
-      <div id="map"></div>
+      <div class="sensor-state">
+        MPU6050 activity classification
+      </div>
 
-
-      <!-- BUTTONS -->
-
-      <div class="button-area">
-
-        <button
-          class="start-btn"
-          onclick="setTracking('start')">
-
-          START TRACKING
-
-        </button>
+    </div>
 
 
-        <button
-          class="stop-btn"
-          onclick="setTracking('stop')">
+    <!-- Accelerometer X -->
 
-          STOP TRACKING
+    <div class="sensor-card accel">
 
-        </button>
+      <div class="sensor-icon">↔️</div>
+
+      <div class="sensor-name">
+        Accelerometer X
+      </div>
+
+      <div class="sensor-value">
+        <span id="accelX">--</span>
+        <span class="sensor-unit">g</span>
+      </div>
+
+      <div class="sensor-state" id="accelXState">
+        Waiting for sensor
+      </div>
+
+    </div>
 
 
-        <button
-          class="maps-btn"
-          onclick="openGoogleMaps()">
+    <!-- Accelerometer Y -->
 
-          OPEN CURRENT LOCATION IN GOOGLE MAPS
+    <div class="sensor-card accel">
 
-        </button>
+      <div class="sensor-icon">↕️</div>
 
+      <div class="sensor-name">
+        Accelerometer Y
+      </div>
+
+      <div class="sensor-value">
+        <span id="accelY">--</span>
+        <span class="sensor-unit">g</span>
+      </div>
+
+      <div class="sensor-state" id="accelYState">
+        Waiting for sensor
+      </div>
+
+    </div>
+
+
+    <!-- Accelerometer Z -->
+
+    <div class="sensor-card accel">
+
+      <div class="sensor-icon">🔄</div>
+
+      <div class="sensor-name">
+        Accelerometer Z
+      </div>
+
+      <div class="sensor-value">
+        <span id="accelZ">--</span>
+        <span class="sensor-unit">g</span>
+      </div>
+
+      <div class="sensor-state" id="accelZState">
+        Waiting for sensor
       </div>
 
     </div>
@@ -882,939 +809,1053 @@
   </div>
 
 
-  <!-- =====================================================
-       FOOTER
-       ===================================================== -->
+  <!-- ================= GPS ================= -->
 
-  <footer>
+  <div class="section-header">
 
-    Cow Health & Live GPS Monitoring System |
-    ESP32 + Sensors + NEO-6M + Blynk + Cloudflare
+    <div>
+      <h2 class="section-title">GPS Location</h2>
 
-  </footer>
+      <p class="section-description">
+        Real-time location and route information from the NEO-6M GPS
+      </p>
+    </div>
 
+  </div>
 
-  <!-- =====================================================
-       LEAFLET JAVASCRIPT
-       ===================================================== -->
 
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
-  </script>
+  <div class="gps-grid">
 
 
-  <script>
+    <div class="gps-card gps">
 
+      <div class="gps-label">
+        Latitude
+      </div>
 
-    /* =====================================================
-       CLOUDFLARE WORKER URL
-       ===================================================== */
+      <div class="gps-value" id="latitude">
+        GPS unavailable
+      </div>
 
-    const API_URL =
-      "https://purple-math-e7c0.mrvardhan03.workers.dev/";
+      <div class="gps-help">
+        Current north/south position
+      </div>
 
+    </div>
 
-    /* =====================================================
-       VARIABLES
-       ===================================================== */
 
-    let latitude = null;
+    <div class="gps-card gps">
 
-    let longitude = null;
+      <div class="gps-label">
+        Longitude
+      </div>
 
-    let marker = null;
+      <div class="gps-value" id="longitude">
+        GPS unavailable
+      </div>
 
-    let routeLine = null;
+      <div class="gps-help">
+        Current east/west position
+      </div>
 
-    let totalDistance = 0;
+    </div>
 
 
-    /* =====================================================
-       DEFAULT MAP LOCATION
-       ===================================================== */
+    <div class="gps-card gps">
 
-    const DEFAULT_LAT =
-      16.5646748;
+      <div class="gps-label">
+        Satellites
+      </div>
 
-    const DEFAULT_LON =
-      81.5253695;
+      <div class="gps-value">
+        <span id="satellites">0</span>
+        <span class="sensor-unit">GPS</span>
+      </div>
 
+      <div class="gps-help">
+        Visible satellite count
+      </div>
 
-    /* =====================================================
-       CREATE MAP
-       ===================================================== */
+    </div>
 
-    const map =
-      L.map("map").setView(
-        [
-          DEFAULT_LAT,
-          DEFAULT_LON
-        ],
-        15
-      );
 
+    <div class="gps-card gps">
 
-    /* =====================================================
-       OPEN STREET MAP
-       ===================================================== */
+      <div class="gps-label">
+        Route Distance
+      </div>
 
-    L.tileLayer(
-      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      {
+      <div class="gps-value">
+        <span id="distance">0.00</span>
+        <span class="sensor-unit">km</span>
+      </div>
 
-        maxZoom: 19,
+      <div class="gps-help">
+        Recorded tracking distance
+      </div>
 
-        attribution:
-          "&copy; OpenStreetMap contributors"
+    </div>
 
-      }
-    ).addTo(map);
+  </div>
 
 
-    /* =====================================================
-       HAVERSINE DISTANCE
-       ===================================================== */
+  <!-- ================= MAP ================= -->
 
-    function calculateDistance(
-      lat1,
-      lon1,
-      lat2,
-      lon2
-    ) {
+  <div class="map-section">
 
-      const R = 6371;
+    <div class="map-header">
 
-      const dLat =
-        (lat2 - lat1) *
-        Math.PI / 180;
+      <div>
+        <div class="map-title">
+          Live Location & Route
+        </div>
 
-      const dLon =
-        (lon2 - lon1) *
-        Math.PI / 180;
+        <div class="map-subtitle">
+          Monitor the cow's current position and travelled route
+        </div>
+      </div>
 
+      <div class="map-status" id="mapStatus">
+        Waiting for GPS
+      </div>
 
-      const a =
-        Math.sin(dLat / 2) *
-        Math.sin(dLat / 2) +
+    </div>
 
-        Math.cos(
-          lat1 * Math.PI / 180
-        ) *
 
-        Math.cos(
-          lat2 * Math.PI / 180
-        ) *
+    <div id="map"></div>
 
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
 
+    <div class="controls">
 
-      const c =
-        2 *
-        Math.atan2(
-          Math.sqrt(a),
-          Math.sqrt(1 - a)
-        );
+      <button
+        class="start"
+        onclick="setTracking('start')">
+        ▶ START TRACKING
+      </button>
 
+      <button
+        class="stop"
+        onclick="setTracking('stop')">
+        ■ STOP TRACKING
+      </button>
 
-      return R * c;
+      <button
+        class="maps"
+        onclick="openGoogleMaps()">
+        📍 OPEN GOOGLE MAPS
+      </button>
 
-    }
+    </div>
 
+  </div>
 
-    /* =====================================================
-       SAFE NUMBER FUNCTION
-       ===================================================== */
 
-    function validNumber(value) {
+  <!-- ================= SYSTEM INFORMATION ================= -->
 
-      return (
-        value !== null &&
-        value !== undefined &&
-        value !== "" &&
-        Number.isFinite(
-          Number(value)
-        )
-      );
+  <div class="info-panel">
 
-    }
+    <div class="info-title">
+      System Information
+    </div>
 
+    <div class="info-text">
+      ESP32 DevKit V1 • DHT11 • DS18B20 • MAX30102 • MPU6050 •
+      OLED • NEO-6M GPS • Blynk IoT • Cloudflare Worker
+    </div>
 
-    /* =====================================================
-       UPDATE TRACKING DISPLAY
-       ===================================================== */
+  </div>
 
-    function updateTrackingDisplay(
-      tracking
-    ) {
+</div>
 
-      const element =
-        document.getElementById(
-          "trackingStatus"
-        );
 
+<!-- ================= FOOTER ================= -->
 
-      if (
-        tracking === "STARTED"
-      ) {
+<footer>
+  Cow Health Monitoring System © 2026
+  <br>
+  IoT-Based Animal Health, Activity & GPS Monitoring
+</footer>
 
-        element.innerText =
-          "STARTED";
 
-        element.style.color =
-          "#16a34a";
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-      }
+<script>
 
-      else {
+/* =========================================================
+   CLOUDFLARE WORKER
+   ========================================================= */
 
-        element.innerText =
-          "STOPPED";
+const API_URL =
+  "https://purple-math-e7c0.mrvardhan03.workers.dev/";
 
-        element.style.color =
-          "#dc2626";
 
-      }
+/* =========================================================
+   VARIABLES
+   ========================================================= */
 
-    }
+let latitude = null;
+let longitude = null;
 
+let marker = null;
+let routeLine = null;
 
-    /* =====================================================
-       SET TRACKING
-       ===================================================== */
+let totalDistance = 0;
 
-    function setTracking(action) {
 
-      fetch(
-        API_URL +
-        "?action=" +
-        action
-      )
+/* =========================================================
+   DEFAULT MAP LOCATION
+   ========================================================= */
 
-      .then(
-        response => {
+const DEFAULT_LAT = 16.5646748;
+const DEFAULT_LON = 81.5253695;
 
-          if (!response.ok) {
 
-            throw new Error(
-              "Tracking command failed"
-            );
+/* =========================================================
+   CREATE MAP
+   ========================================================= */
 
-          }
+const map = L.map("map").setView(
+  [
+    DEFAULT_LAT,
+    DEFAULT_LON
+  ],
+  15
+);
 
-          return response.json();
 
-        }
-      )
+/* =========================================================
+   OPEN STREET MAP
+   ========================================================= */
 
+L.tileLayer(
+  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  {
+    maxZoom: 19,
+    attribution:
+      "&copy; OpenStreetMap contributors"
+  }
+).addTo(map);
 
-      .then(
-        data => {
 
-          updateTrackingDisplay(
-            data.tracking
-          );
+/* =========================================================
+   VALID NUMBER
+   ========================================================= */
 
+function validNumber(value) {
 
-          if (
-            data.tracking ===
-            "STARTED"
-          ) {
+  return (
+    value !== null &&
+    value !== undefined &&
+    value !== "" &&
+    Number.isFinite(Number(value))
+  );
 
-            alert(
-              "GPS tracking STARTED"
-            );
+}
 
-          }
 
-          else {
+/* =========================================================
+   HAVERSINE
+   ========================================================= */
 
-            alert(
-              "GPS tracking STOPPED"
-            );
+function calculateDistance(
+  lat1,
+  lon1,
+  lat2,
+  lon2
+) {
 
-          }
+  const R = 6371;
 
+  const dLat =
+    (lat2 - lat1) *
+    Math.PI / 180;
 
-          updateGPS();
+  const dLon =
+    (lon2 - lon1) *
+    Math.PI / 180;
 
-        }
-      )
+  const a =
+    Math.sin(dLat / 2) *
+    Math.sin(dLat / 2) +
 
+    Math.cos(
+      lat1 * Math.PI / 180
+    ) *
 
-      .catch(
-        error => {
+    Math.cos(
+      lat2 * Math.PI / 180
+    ) *
 
-          console.log(error);
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
 
-          alert(
-            "Unable to change tracking status"
-          );
-
-        }
-      );
-
-    }
-
-
-    /* =====================================================
-       UPDATE GPS + HEALTH DATA
-       ===================================================== */
-
-    function updateGPS() {
-
-      fetch(API_URL)
-
-        .then(
-          response => {
-
-            if (!response.ok) {
-
-              throw new Error(
-                "Server response error"
-              );
-
-            }
-
-            return response.json();
-
-          }
-        )
-
-
-        .then(
-          data => {
-
-
-            /* ==========================================
-               TRACKING
-               ========================================== */
-
-            updateTrackingDisplay(
-              data.tracking
-            );
-
-
-            /* ==========================================
-               GPS STATUS
-               IMPORTANT:
-               Worker uses gpsStatus
-               ========================================== */
-
-            const gpsStatus =
-              data.gpsStatus ||
-              "WAITING FOR GPS";
-
-
-            document.getElementById(
-              "status"
-            ).innerText =
-              gpsStatus;
-
-
-            /* ==========================================
-               GPS STATUS DOT
-               ========================================== */
-
-            const statusDot =
-              document.getElementById(
-                "statusDot"
-              );
-
-
-            if (
-              gpsStatus ===
-              "GPS FIXED"
-            ) {
-
-              statusDot.style.background =
-                "#22c55e";
-
-              statusDot.style.boxShadow =
-                "0 0 8px rgba(34,197,94,0.6)";
-
-            }
-
-            else {
-
-              statusDot.style.background =
-                "#f59e0b";
-
-              statusDot.style.boxShadow =
-                "0 0 8px rgba(245,158,11,0.5)";
-
-            }
-
-
-            /* ==========================================
-               LAST UPDATE
-               ========================================== */
-
-            document.getElementById(
-              "lastUpdate"
-            ).innerText =
-              new Date().toLocaleTimeString();
-
-
-            /* ==========================================
-               GPS VALUES
-               ========================================== */
-
-            if (
-              validNumber(data.latitude) &&
-              validNumber(data.longitude)
-            ) {
-
-              latitude =
-                Number(data.latitude);
-
-              longitude =
-                Number(data.longitude);
-
-
-              document.getElementById(
-                "latitude"
-              ).innerText =
-                latitude.toFixed(6);
-
-
-              document.getElementById(
-                "longitude"
-              ).innerText =
-                longitude.toFixed(6);
-
-
-              if (
-                validNumber(data.satellites)
-              ) {
-
-                document.getElementById(
-                  "satellites"
-                ).innerText =
-                  data.satellites;
-
-              }
-
-              else {
-
-                document.getElementById(
-                  "satellites"
-                ).innerText =
-                  "0";
-
-              }
-
-
-              /* ======================================
-                 CURRENT MARKER
-                 ====================================== */
-
-              if (
-                marker === null
-              ) {
-
-                marker =
-                  L.marker(
-                    [
-                      latitude,
-                      longitude
-                    ]
-                  )
-                  .addTo(map)
-                  .bindPopup(
-                    "Current Cow Location"
-                  );
-
-              }
-
-              else {
-
-                marker.setLatLng(
-                  [
-                    latitude,
-                    longitude
-                  ]
-                );
-
-              }
-
-
-              /* ======================================
-                 MOVE MAP
-                 ====================================== */
-
-              map.setView(
-                [
-                  latitude,
-                  longitude
-                ],
-                map.getZoom()
-              );
-
-            }
-
-            else {
-
-              document.getElementById(
-                "latitude"
-              ).innerText =
-                "GPS unavailable";
-
-
-              document.getElementById(
-                "longitude"
-              ).innerText =
-                "GPS unavailable";
-
-
-              document.getElementById(
-                "satellites"
-              ).innerText =
-                "0";
-
-            }
-
-
-            /* ==========================================
-               HEALTH DATA
-               ========================================== */
-
-
-            /* ENVIRONMENT TEMP */
-
-            if (
-              validNumber(
-                data.environmentTemp
-              )
-            ) {
-
-              document.getElementById(
-                "environmentTemp"
-              ).innerText =
-                Number(
-                  data.environmentTemp
-                ).toFixed(1);
-
-            }
-
-            else {
-
-              document.getElementById(
-                "environmentTemp"
-              ).innerText =
-                "--";
-
-            }
-
-
-            /* HUMIDITY */
-
-            if (
-              validNumber(
-                data.humidity
-              )
-            ) {
-
-              document.getElementById(
-                "humidity"
-              ).innerText =
-                Number(
-                  data.humidity
-                ).toFixed(1);
-
-            }
-
-            else {
-
-              document.getElementById(
-                "humidity"
-              ).innerText =
-                "--";
-
-            }
-
-
-            /* COW CONTACT TEMPERATURE */
-
-            if (
-              validNumber(
-                data.cowTemperature
-              )
-            ) {
-
-              document.getElementById(
-                "cowTemperature"
-              ).innerText =
-                Number(
-                  data.cowTemperature
-                ).toFixed(1);
-
-            }
-
-            else {
-
-              document.getElementById(
-                "cowTemperature"
-              ).innerText =
-                "--";
-
-            }
-
-
-            /* HEART RATE */
-
-            if (
-              validNumber(
-                data.heartRate
-              )
-            ) {
-
-              const bpm =
-                Number(
-                  data.heartRate
-                );
-
-
-              if (bpm > 0) {
-
-                document.getElementById(
-                  "heartRate"
-                ).innerText =
-                  bpm;
-
-              }
-
-              else {
-
-                document.getElementById(
-                  "heartRate"
-                ).innerText =
-                  "--";
-
-              }
-
-            }
-
-            else {
-
-              document.getElementById(
-                "heartRate"
-              ).innerText =
-                "--";
-
-            }
-
-
-            /* ACTIVITY */
-
-            document.getElementById(
-              "activity"
-            ).innerText =
-              data.activity ||
-              "STABLE";
-
-
-            /* ACCEL X */
-
-            if (
-              validNumber(
-                data.accelX
-              )
-            ) {
-
-              document.getElementById(
-                "accelX"
-              ).innerText =
-                Number(
-                  data.accelX
-                ).toFixed(2);
-
-            }
-
-            else {
-
-              document.getElementById(
-                "accelX"
-              ).innerText =
-                "--";
-
-            }
-
-
-            /* ACCEL Y */
-
-            if (
-              validNumber(
-                data.accelY
-              )
-            ) {
-
-              document.getElementById(
-                "accelY"
-              ).innerText =
-                Number(
-                  data.accelY
-                ).toFixed(2);
-
-            }
-
-            else {
-
-              document.getElementById(
-                "accelY"
-              ).innerText =
-                "--";
-
-            }
-
-
-            /* ACCEL Z */
-
-            if (
-              validNumber(
-                data.accelZ
-              )
-            ) {
-
-              document.getElementById(
-                "accelZ"
-              ).innerText =
-                Number(
-                  data.accelZ
-                ).toFixed(2);
-
-            }
-
-            else {
-
-              document.getElementById(
-                "accelZ"
-              ).innerText =
-                "--";
-
-            }
-
-
-            /* ==========================================
-               ROUTE HISTORY
-               ========================================== */
-
-            if (
-              Array.isArray(
-                data.history
-              ) &&
-              data.history.length > 0
-            ) {
-
-
-              const routePoints =
-                data.history
-
-                  .filter(
-                    point =>
-                      validNumber(
-                        point.latitude
-                      ) &&
-                      validNumber(
-                        point.longitude
-                      )
-                  )
-
-                  .map(
-                    point => [
-
-                      Number(
-                        point.latitude
-                      ),
-
-                      Number(
-                        point.longitude
-                      )
-
-                    ]
-                  );
-
-
-              if (
-                routePoints.length > 0
-              ) {
-
-
-                /* ======================================
-                   DRAW ROUTE
-                   ====================================== */
-
-                if (
-                  routeLine === null
-                ) {
-
-                  routeLine =
-                    L.polyline(
-                      routePoints,
-                      {
-                        weight: 5
-                      }
-                    ).addTo(map);
-
-                }
-
-                else {
-
-                  routeLine.setLatLngs(
-                    routePoints
-                  );
-
-                }
-
-
-                /* ======================================
-                   DISTANCE
-                   ====================================== */
-
-                totalDistance = 0;
-
-
-                for (
-                  let i = 1;
-                  i < routePoints.length;
-                  i++
-                ) {
-
-                  totalDistance +=
-                    calculateDistance(
-
-                      routePoints[
-                        i - 1
-                      ][0],
-
-                      routePoints[
-                        i - 1
-                      ][1],
-
-                      routePoints[
-                        i
-                      ][0],
-
-                      routePoints[
-                        i
-                      ][1]
-
-                    );
-
-                }
-
-
-                document.getElementById(
-                  "distance"
-                ).innerText =
-                  totalDistance.toFixed(2);
-
-              }
-
-            }
-
-            else {
-
-              document.getElementById(
-                "distance"
-              ).innerText =
-                "0.00";
-
-            }
-
-          }
-        )
-
-
-        /* =============================================
-           CONNECTION ERROR
-           ============================================= */
-
-        .catch(
-          error => {
-
-            console.log(
-              "API Error:",
-              error
-            );
-
-
-            document.getElementById(
-              "status"
-            ).innerText =
-              "Connection Error";
-
-
-            document.getElementById(
-              "statusDot"
-            ).style.background =
-              "#ef4444";
-
-
-            document.getElementById(
-              "lastUpdate"
-            ).innerText =
-              "Connection failed";
-
-          }
-        );
-
-    }
-
-
-    /* =====================================================
-       GOOGLE MAPS
-       ===================================================== */
-
-    function openGoogleMaps() {
-
-      if (
-        latitude === null ||
-        longitude === null
-      ) {
-
-        alert(
-          "GPS location is not available yet."
-        );
-
-        return;
-
-      }
-
-
-      const url =
-        "https://www.google.com/maps?q=" +
-        latitude +
-        "," +
-        longitude;
-
-
-      window.open(
-        url,
-        "_blank"
-      );
-
-    }
-
-
-    /* =====================================================
-       UPDATE EVERY 5 SECONDS
-       ===================================================== */
-
-    setInterval(
-      updateGPS,
-      5000
+  const c =
+    2 *
+    Math.atan2(
+      Math.sqrt(a),
+      Math.sqrt(1 - a)
     );
 
+  return R * c;
+}
 
-    /* =====================================================
-       FIRST UPDATE
-       ===================================================== */
+
+/* =========================================================
+   TRACKING DISPLAY
+   ========================================================= */
+
+function updateTrackingDisplay(tracking) {
+
+  const element =
+    document.getElementById("trackingStatus");
+
+  if (tracking === "STARTED") {
+
+    element.innerText = "STARTED";
+    element.style.color = "#16a34a";
+
+  } else {
+
+    element.innerText = "STOPPED";
+    element.style.color = "#dc2626";
+
+  }
+
+}
+
+
+/* =========================================================
+   SENSOR STATE
+   ========================================================= */
+
+function sensorState(
+  id,
+  available,
+  onlineText = "Sensor connected"
+) {
+
+  const element =
+    document.getElementById(id);
+
+  if (!element) return;
+
+  if (available) {
+
+    element.innerText = onlineText;
+    element.classList.add("online");
+
+  } else {
+
+    element.innerText =
+      "Waiting for sensor";
+
+    element.classList.remove("online");
+
+  }
+
+}
+
+
+/* =========================================================
+   SET TRACKING
+   ========================================================= */
+
+function setTracking(action) {
+
+  fetch(
+    API_URL +
+    "?action=" +
+    action
+  )
+
+  .then(response => {
+
+    if (!response.ok) {
+      throw new Error(
+        "Tracking command failed"
+      );
+    }
+
+    return response.json();
+
+  })
+
+  .then(data => {
+
+    updateTrackingDisplay(
+      data.tracking
+    );
 
     updateGPS();
 
-  </script>
+  })
+
+  .catch(error => {
+
+    console.log(error);
+
+    alert(
+      "Unable to change tracking status"
+    );
+
+  });
+
+}
+
+
+/* =========================================================
+   UPDATE DATA
+   ========================================================= */
+
+function updateGPS() {
+
+  fetch(API_URL)
+
+  .then(response => {
+
+    if (!response.ok) {
+      throw new Error(
+        "Server response error"
+      );
+    }
+
+    return response.json();
+
+  })
+
+  .then(data => {
+
+
+    /* =========================================
+       SYSTEM ONLINE
+       ========================================= */
+
+    document.getElementById(
+      "systemStatus"
+    ).innerText = "ONLINE";
+
+    document.getElementById(
+      "headerStatus"
+    ).innerText = "System Connected";
+
+    document.getElementById(
+      "systemDot"
+    ).className =
+      "status-badge-dot green";
+
+    document.getElementById(
+      "headerDot"
+    ).style.background =
+      "#22c55e";
+
+
+    /* =========================================
+       LAST UPDATE
+       ========================================= */
+
+    document.getElementById(
+      "lastUpdate"
+    ).innerText =
+      new Date().toLocaleTimeString();
+
+
+    /* =========================================
+       TRACKING
+       ========================================= */
+
+    updateTrackingDisplay(
+      data.tracking
+    );
+
+
+    /* =========================================
+       GPS STATUS
+       ========================================= */
+
+    const gpsStatus =
+      data.gpsStatus ||
+      "WAITING FOR GPS";
+
+    document.getElementById(
+      "gpsStatus"
+    ).innerText =
+      gpsStatus;
+
+    document.getElementById(
+      "mapStatus"
+    ).innerText =
+      gpsStatus;
+
+
+    if (
+      gpsStatus === "GPS FIXED"
+    ) {
+
+      document.getElementById(
+        "mapStatus"
+      ).style.background =
+        "#eaf8ef";
+
+      document.getElementById(
+        "mapStatus"
+      ).style.color =
+        "#15803d";
+
+    } else {
+
+      document.getElementById(
+        "mapStatus"
+      ).style.background =
+        "#fff7df";
+
+      document.getElementById(
+        "mapStatus"
+      ).style.color =
+        "#a16207";
+
+    }
+
+
+    /* =========================================
+       GPS VALUES
+       ========================================= */
+
+    if (
+      validNumber(data.latitude) &&
+      validNumber(data.longitude)
+    ) {
+
+      latitude =
+        Number(data.latitude);
+
+      longitude =
+        Number(data.longitude);
+
+
+      document.getElementById(
+        "latitude"
+      ).innerText =
+        latitude.toFixed(6);
+
+
+      document.getElementById(
+        "longitude"
+      ).innerText =
+        longitude.toFixed(6);
+
+
+      if (
+        validNumber(data.satellites)
+      ) {
+
+        document.getElementById(
+          "satellites"
+        ).innerText =
+          data.satellites;
+
+      }
+
+
+      /* Marker */
+
+      if (marker === null) {
+
+        marker =
+          L.marker(
+            [
+              latitude,
+              longitude
+            ]
+          )
+          .addTo(map)
+          .bindPopup(
+            "🐄 Current Cow Location"
+          );
+
+      } else {
+
+        marker.setLatLng(
+          [
+            latitude,
+            longitude
+          ]
+        );
+
+      }
+
+
+      map.setView(
+        [
+          latitude,
+          longitude
+        ],
+        map.getZoom()
+      );
+
+    } else {
+
+      document.getElementById(
+        "latitude"
+      ).innerText =
+        "GPS unavailable";
+
+      document.getElementById(
+        "longitude"
+      ).innerText =
+        "GPS unavailable";
+
+      document.getElementById(
+        "satellites"
+      ).innerText =
+        "0";
+
+    }
+
+
+    /* =========================================
+       COW TEMPERATURE
+       ========================================= */
+
+    if (
+      validNumber(data.cowTemperature)
+    ) {
+
+      document.getElementById(
+        "cowTemperature"
+      ).innerText =
+        Number(
+          data.cowTemperature
+        ).toFixed(1);
+
+      sensorState(
+        "cowTempState",
+        true
+      );
+
+    } else {
+
+      document.getElementById(
+        "cowTemperature"
+      ).innerText =
+        "--";
+
+      sensorState(
+        "cowTempState",
+        false
+      );
+
+    }
+
+
+    /* =========================================
+       HEART RATE
+       ========================================= */
+
+    if (
+      validNumber(data.heartRate) &&
+      Number(data.heartRate) > 0
+    ) {
+
+      document.getElementById(
+        "heartRate"
+      ).innerText =
+        Number(data.heartRate);
+
+      sensorState(
+        "heartState",
+        true
+      );
+
+    } else {
+
+      document.getElementById(
+        "heartRate"
+      ).innerText =
+        "--";
+
+      sensorState(
+        "heartState",
+        false
+      );
+
+    }
+
+
+    /* =========================================
+       ENVIRONMENT TEMP
+       ========================================= */
+
+    if (
+      validNumber(data.environmentTemp)
+    ) {
+
+      document.getElementById(
+        "environmentTemp"
+      ).innerText =
+        Number(
+          data.environmentTemp
+        ).toFixed(1);
+
+      sensorState(
+        "environmentState",
+        true
+      );
+
+    } else {
+
+      document.getElementById(
+        "environmentTemp"
+      ).innerText =
+        "--";
+
+      sensorState(
+        "environmentState",
+        false
+      );
+
+    }
+
+
+    /* =========================================
+       HUMIDITY
+       ========================================= */
+
+    if (
+      validNumber(data.humidity)
+    ) {
+
+      document.getElementById(
+        "humidity"
+      ).innerText =
+        Number(
+          data.humidity
+        ).toFixed(1);
+
+      sensorState(
+        "humidityState",
+        true
+      );
+
+    } else {
+
+      document.getElementById(
+        "humidity"
+      ).innerText =
+        "--";
+
+      sensorState(
+        "humidityState",
+        false
+      );
+
+    }
+
+
+    /* =========================================
+       ACTIVITY
+       ========================================= */
+
+    document.getElementById(
+      "activity"
+    ).innerText =
+      data.activity ||
+      "STABLE";
+
+
+    /* =========================================
+       ACCELEROMETER X
+       ========================================= */
+
+    if (
+      validNumber(data.accelX)
+    ) {
+
+      document.getElementById(
+        "accelX"
+      ).innerText =
+        Number(
+          data.accelX
+        ).toFixed(2);
+
+      sensorState(
+        "accelXState",
+        true
+      );
+
+    } else {
+
+      document.getElementById(
+        "accelX"
+      ).innerText =
+        "--";
+
+      sensorState(
+        "accelXState",
+        false
+      );
+
+    }
+
+
+    /* =========================================
+       ACCELEROMETER Y
+       ========================================= */
+
+    if (
+      validNumber(data.accelY)
+    ) {
+
+      document.getElementById(
+        "accelY"
+      ).innerText =
+        Number(
+          data.accelY
+        ).toFixed(2);
+
+      sensorState(
+        "accelYState",
+        true
+      );
+
+    } else {
+
+      document.getElementById(
+        "accelY"
+      ).innerText =
+        "--";
+
+      sensorState(
+        "accelYState",
+        false
+      );
+
+    }
+
+
+    /* =========================================
+       ACCELEROMETER Z
+       ========================================= */
+
+    if (
+      validNumber(data.accelZ)
+    ) {
+
+      document.getElementById(
+        "accelZ"
+      ).innerText =
+        Number(
+          data.accelZ
+        ).toFixed(2);
+
+      sensorState(
+        "accelZState",
+        true
+      );
+
+    } else {
+
+      document.getElementById(
+        "accelZ"
+      ).innerText =
+        "--";
+
+      sensorState(
+        "accelZState",
+        false
+      );
+
+    }
+
+
+    /* =========================================
+       ROUTE HISTORY
+       ========================================= */
+
+    if (
+      Array.isArray(data.history) &&
+      data.history.length > 0
+    ) {
+
+      const routePoints =
+        data.history
+
+        .filter(point =>
+          validNumber(point.latitude) &&
+          validNumber(point.longitude)
+        )
+
+        .map(point => [
+
+          Number(point.latitude),
+          Number(point.longitude)
+
+        ]);
+
+
+      if (
+        routePoints.length > 0
+      ) {
+
+        if (
+          routeLine === null
+        ) {
+
+          routeLine =
+            L.polyline(
+              routePoints,
+              {
+                weight: 5
+              }
+            ).addTo(map);
+
+        } else {
+
+          routeLine.setLatLngs(
+            routePoints
+          );
+
+        }
+
+
+        totalDistance = 0;
+
+
+        for (
+          let i = 1;
+          i < routePoints.length;
+          i++
+        ) {
+
+          totalDistance +=
+            calculateDistance(
+
+              routePoints[i - 1][0],
+              routePoints[i - 1][1],
+
+              routePoints[i][0],
+              routePoints[i][1]
+
+            );
+
+        }
+
+
+        document.getElementById(
+          "distance"
+        ).innerText =
+          totalDistance.toFixed(2);
+
+      }
+
+    } else {
+
+      document.getElementById(
+        "distance"
+      ).innerText =
+        "0.00";
+
+    }
+
+  })
+
+
+  /* =========================================
+     CONNECTION ERROR
+     ========================================= */
+
+  .catch(error => {
+
+    console.log(
+      "API Error:",
+      error
+    );
+
+
+    document.getElementById(
+      "systemStatus"
+    ).innerText =
+      "CONNECTION ERROR";
+
+
+    document.getElementById(
+      "headerStatus"
+    ).innerText =
+      "Connection Error";
+
+
+    document.getElementById(
+      "systemDot"
+    ).className =
+      "status-badge-dot";
+
+
+    document.getElementById(
+      "headerDot"
+    ).style.background =
+      "#ef4444";
+
+
+    document.getElementById(
+      "lastUpdate"
+    ).innerText =
+      "Connection failed";
+
+  });
+
+}
+
+
+/* =========================================================
+   GOOGLE MAPS
+   ========================================================= */
+
+function openGoogleMaps() {
+
+  if (
+    latitude === null ||
+    longitude === null
+  ) {
+
+    alert(
+      "GPS location is not available yet."
+    );
+
+    return;
+  }
+
+
+  const url =
+    "https://www.google.com/maps?q=" +
+    latitude +
+    "," +
+    longitude;
+
+
+  window.open(
+    url,
+    "_blank"
+  );
+
+}
+
+
+/* =========================================================
+   AUTO REFRESH
+   ========================================================= */
+
+setInterval(
+  updateGPS,
+  5000
+);
+
+
+/* =========================================================
+   FIRST UPDATE
+   ========================================================= */
+
+updateGPS();
+
+</script>
 
 </body>
-
 </html>
